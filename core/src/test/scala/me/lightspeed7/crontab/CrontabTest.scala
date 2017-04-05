@@ -9,37 +9,47 @@ class CrontabTest extends FunSuite {
   import Crontab._
   import Schedule._
 
+  test("Predefined") {
+    Crontab.daily should be(Cron(Fixed(0), Fixed(0), Every, Every, Every))
+    Crontab.hourly should be(Cron(Fixed(0), Every, Every, Every, Every))
+    Crontab.monthly should be(Cron(Fixed(0), Fixed(0), Fixed(1), Every, Every))
+    Crontab.weekly should be(Cron(Fixed(0), Fixed(0), Every, Every, Fixed(0)))
+    Crontab.yearly should be(Cron(Fixed(0), Fixed(0), Fixed(1), Fixed(1), Every))
+
+    Crontab.everyDayAt(12) should be(Cron(Fixed(0), Fixed(12), Every, Every, Every))
+  }
+
   test("Test Basic Parsing") {
-    cron"1 * * * *".get.toString should be(s"Cron(Fixed(1),Every,Every,Every,Every)") // minute ( 0-59 )
-    cron"* 1 * * *".get.toString should be(s"Cron(Every,Fixed(1),Every,Every,Every)") // hour (0 - 23 )
-    cron"* * 1 * *".get.toString should be(s"Cron(Every,Every,Fixed(1),Every,Every)") // day of month ( 1 -31 )
-    cron"* * * 1 *".get.toString should be(s"Cron(Every,Every,Every,Fixed(1),Every)") // month ( 1 -12 )
-    cron"* * * * 1".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(1))") // day of week ( 0 - 7, Sun to Sat, 7 also Sun )
+    cron"1 * * * *".get should be(Cron(Fixed(1), Every, Every, Every, Every)) // minute ( 0-59 )
+    cron"* 1 * * *".get should be(Cron(Every, Fixed(1), Every, Every, Every)) // hour (0 - 23 )
+    cron"* * 1 * *".get should be(Cron(Every, Every, Fixed(1), Every, Every)) // day of month ( 1 -31 )
+    cron"* * * 1 *".get should be(Cron(Every, Every, Every, Fixed(1), Every)) // month ( 1 -12 )
+    cron"* * * * 1".get should be(Cron(Every, Every, Every, Every, Fixed(1))) // day of week ( 0 - 7, Sun to Sat, 7 also Sun )
 
-    cron"*/5 * * * *".get.toString should be(s"Cron(Steps(List(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55)),Every,Every,Every,Every)") // fixed
-    cron"1,5 * * * *".get.toString should be(s"Cron(Steps(List(1, 5)),Every,Every,Every,Every)") // Divisors
-    cron"1-5 * * * *".get.toString should be(s"Cron(Range(1,5),Every,Every,Every,Every)") // range
+    cron"*/5 * * * *".get should be(Cron(Steps(List(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55)), Every, Every, Every, Every)) // fixed
+    cron"1,5 * * * *".get should be(Cron(Steps(List(1, 5)), Every, Every, Every, Every)) // Divisors
+    cron"1-5 * * * *".get should be(Cron(Range(1, 5), Every, Every, Every, Every)) // range
 
-    cron"* * * * SUN".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(0))") // day of week
-    cron"* * * * MON".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(1))") // day of week
-    cron"* * * * TUE".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(2))") // day of week
-    cron"* * * * WED".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(3))") // day of week
-    cron"* * * * THU".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(4))") // day of week
-    cron"* * * * FRI".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(5))") // day of week
-    cron"* * * * SAT".get.toString should be(s"Cron(Every,Every,Every,Every,Fixed(6))") // day of week
+    cron"* * * * SUN".get should be(Cron(Every, Every, Every, Every, Fixed(0))) // day of week
+    cron"* * * * MON".get should be(Cron(Every, Every, Every, Every, Fixed(1))) // day of week
+    cron"* * * * TUE".get should be(Cron(Every, Every, Every, Every, Fixed(2))) // day of week
+    cron"* * * * WED".get should be(Cron(Every, Every, Every, Every, Fixed(3))) // day of week
+    cron"* * * * THU".get should be(Cron(Every, Every, Every, Every, Fixed(4))) // day of week
+    cron"* * * * FRI".get should be(Cron(Every, Every, Every, Every, Fixed(5))) // day of week
+    cron"* * * * SAT".get should be(Cron(Every, Every, Every, Every, Fixed(6))) // day of week
 
-    cron"* * * JAN *".get.toString should be(s"Cron(Every,Every,Every,Fixed(1),Every)") // month by name
-    cron"* * * FEB *".get.toString should be(s"Cron(Every,Every,Every,Fixed(2),Every)") // month by name
-    cron"* * * MAR *".get.toString should be(s"Cron(Every,Every,Every,Fixed(3),Every)") // month by name
-    cron"* * * APR *".get.toString should be(s"Cron(Every,Every,Every,Fixed(4),Every)") // month by name
-    cron"* * * MAY *".get.toString should be(s"Cron(Every,Every,Every,Fixed(5),Every)") // month by name
-    cron"* * * JUN *".get.toString should be(s"Cron(Every,Every,Every,Fixed(6),Every)") // month by name
-    cron"* * * JUL *".get.toString should be(s"Cron(Every,Every,Every,Fixed(7),Every)") // month by name
-    cron"* * * AUG *".get.toString should be(s"Cron(Every,Every,Every,Fixed(8),Every)") // month by name
-    cron"* * * SEP *".get.toString should be(s"Cron(Every,Every,Every,Fixed(9),Every)") // month by name
-    cron"* * * OCT *".get.toString should be(s"Cron(Every,Every,Every,Fixed(10),Every)") // month by name
-    cron"* * * NOV *".get.toString should be(s"Cron(Every,Every,Every,Fixed(11),Every)") // month by name
-    cron"* * * DEC *".get.toString should be(s"Cron(Every,Every,Every,Fixed(12),Every)") // month by name
+    cron"* * * JAN *".get should be(Cron(Every, Every, Every, Fixed(1), Every)) // month by name
+    cron"* * * FEB *".get should be(Cron(Every, Every, Every, Fixed(2), Every)) // month by name
+    cron"* * * MAR *".get should be(Cron(Every, Every, Every, Fixed(3), Every)) // month by name
+    cron"* * * APR *".get should be(Cron(Every, Every, Every, Fixed(4), Every)) // month by name
+    cron"* * * MAY *".get should be(Cron(Every, Every, Every, Fixed(5), Every)) // month by name
+    cron"* * * JUN *".get should be(Cron(Every, Every, Every, Fixed(6), Every)) // month by name
+    cron"* * * JUL *".get should be(Cron(Every, Every, Every, Fixed(7), Every)) // month by name
+    cron"* * * AUG *".get should be(Cron(Every, Every, Every, Fixed(8), Every)) // month by name
+    cron"* * * SEP *".get should be(Cron(Every, Every, Every, Fixed(9), Every)) // month by name
+    cron"* * * OCT *".get should be(Cron(Every, Every, Every, Fixed(10), Every)) // month by name
+    cron"* * * NOV *".get should be(Cron(Every, Every, Every, Fixed(11), Every)) // month by name
+    cron"* * * DEC *".get should be(Cron(Every, Every, Every, Fixed(12), Every)) // month by name
   }
 
   test("Prevent invalid use of month") {

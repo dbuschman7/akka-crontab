@@ -8,6 +8,17 @@ import scala.util.parsing.combinator.RegexParsers
 object Crontab extends RegexParsers {
 
   //
+  // Predefined
+  // //////////////////////////
+  def yearly: Cron = Cron(Fixed(0), Fixed(0), Fixed(1), Fixed(1), Every)
+  def monthly: Cron = Cron(Fixed(0), Fixed(0), Fixed(1), Every, Every)
+  def weekly: Cron = Cron(Fixed(0), Fixed(0), Every, Every, Fixed(0))
+  def daily: Cron = Cron(Fixed(0), Fixed(0), Every, Every, Every)
+  def hourly: Cron = Cron(Fixed(0), Every, Every, Every, Every)
+
+  def everyDayAt(hour: Int) = Cron(Fixed(0), Fixed(hour), Every, Every, Every)
+
+  //
   // Parser 
   // //////////////////////////
   def apply(input: String): Try[Cron] = parseAll(cron, Option(input).map(_.toUpperCase()).getOrElse("")) match {
@@ -50,7 +61,7 @@ object Crontab extends RegexParsers {
   private def number: Parser[String] = "[0-9]+".r
 
   // Handle bounded range - n-m 
-  private def bounds: Parser[Timing] = number ~ "-" ~ number ^^ { case f ~ x ~ t ⇒ Range( f.toInt, t.toInt) }
+  private def bounds: Parser[Timing] = number ~ "-" ~ number ^^ { case f ~ x ~ t ⇒ Range(f.toInt, t.toInt) }
 
   // Handle wildcard and intevals
   private def steps: Parser[Timing] = "*" ~ opt("/" ~ number) ^^ {
