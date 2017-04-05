@@ -10,8 +10,6 @@ class CrontabTest extends FunSuite {
   import Schedule._
 
   test("Test Basic Parsing") {
-    val zId = ZoneId.systemDefault().toString
-
     cron"1 * * * *".get.toString should be(s"Cron(Fixed(1),Every,Every,Every,Every)") // minute ( 0-59 )
     cron"* 1 * * *".get.toString should be(s"Cron(Every,Fixed(1),Every,Every,Every)") // hour (0 - 23 )
     cron"* * 1 * *".get.toString should be(s"Cron(Every,Every,Fixed(1),Every,Every)") // day of month ( 1 -31 )
