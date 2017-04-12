@@ -33,6 +33,7 @@ class ScheduleTest extends FunSuite {
     implicit val ex = ExecutionContext.global
     val result = Await.ready(Schedule.nextScheduledTime(dt, 5 seconds)(cron"0 0 5 31 2".get), 20 seconds)
     result.isCompleted should be(true)
+    result.value.get.isFailure should be(true)
     result.recover {
       case (e: Throwable) =>
         e.getClass.getSimpleName should be("TimeoutException")
