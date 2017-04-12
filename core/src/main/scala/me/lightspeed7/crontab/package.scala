@@ -1,7 +1,6 @@
 package me.lightspeed7
 
 import scala.util.Try
-import java.time.ZoneId
 
 package object crontab {
 
