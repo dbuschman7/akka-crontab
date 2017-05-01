@@ -26,7 +26,7 @@ val parsed2: Try[Cron] = Crontab.apply("1 * * * *")
 
 ```
 
-## Sceduling - finding the next time from the cron to run
+## Scheduling - finding the next time from the cron to run
 
 ```scala
 import me.lightspeed7.crontab._
@@ -35,6 +35,12 @@ cron"".map { implicit cron =>
   val nextRunTime: Future[LocalDateTime] = Schedule.nextScheduledTime(LocalDateTime.now, 5 seconds)
   // ...
 }
+```
+
+## Running a Cron with Akka Actor 
+```scala
+
+
 ```
 
 

@@ -1,17 +1,14 @@
 package me.lightspeed7.crontab
 
-import java.time.LocalDateTime
-import java.time.DayOfWeek
-import scala.concurrent.Future
-import akka.util.Timeout
-import scala.concurrent.duration.Duration
-import scala.concurrent.duration._
-import java.util.concurrent.TimeUnit
-import java.time.temporal.TemporalUnit
-import java.time.temporal.ChronoUnit
-import java.time.ZoneOffset
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeoutException
+
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationInt
 
 object Schedule {
 
