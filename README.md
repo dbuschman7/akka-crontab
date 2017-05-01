@@ -39,7 +39,16 @@ cron"".map { implicit cron =>
 
 ## Running a Cron with Akka Actor 
 ```scala
+class CronActor(cron: Cron) extends Actor {
 
+  val scheduler = context.actorOf(Props(classOf[ScheduleActor], CronConfig(self, cron)))
+
+  def receive: Actor.Receive = {
+    case time: LocalDateTime =>
+      // cron needs to run
+    ...  
+  }
+}
 
 ```
 
