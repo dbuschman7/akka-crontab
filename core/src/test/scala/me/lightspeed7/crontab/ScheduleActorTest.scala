@@ -1,23 +1,15 @@
 package me.lightspeed7.crontab
 
 import java.time.LocalDateTime
-
-import org.scalatest.FunSuiteLike
-
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.testkit.ImplicitSender
-import akka.testkit.TestKit
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.Matchers
-import scala.concurrent.duration._
-
-import akka.pattern.ask
-import akka.util.Timeout
-import akka.testkit.TestActorRef
 import java.time.temporal.ChronoUnit
+
+import akka.actor.{Actor, ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import akka.util.Timeout
+import org.scalatest._
+
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class ScheduleActorTest
     extends TestKit(ActorSystem("Scheduling"))
@@ -48,7 +40,7 @@ class ScheduleActorTest
     val now = LocalDateTime.now
     val delta = now.until(nextRun.time, ChronoUnit.MILLIS)
     delta should be > (0L)
-    delta should be < (60L * 1000)
+    delta should be < (61L * 1000) // 1 second threshold
   }
 
   test("Testing CalcTimeDistance Business Logic") {

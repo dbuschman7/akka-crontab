@@ -9,30 +9,23 @@ lazy val common = Seq(
 lazy val core = project
   .settings(common)
   .settings(
-    name := "akka-crontab-core",
-    libraryDependencies ++= Dependencies.Core 
+    name := "akka-crontab",
+    scalaVersion := "2.11.7",
+    libraryDependencies ++= Dependencies.Core
   )
   
-  lazy val akka = project
-  .settings(common)
-  .settings(
-    name := "akka-crontab",
-    libraryDependencies ++= Dependencies.Akka
-  ).dependsOn(//
-   core % "test->test;compile->compile" //
-  )
-
 lazy val streams = project
   .settings(common)
   .settings(
     name := "akka-crontab-streams",
+    scalaVersion := "2.11.7",
     libraryDependencies ++= Dependencies.Streams
   )
   .dependsOn( //
-   akka % "test->test;compile->compile" //
+   core % "test->test;compile->compile" //
   )
 
 lazy val root = (project in file("."))
    .settings(common)
-   .aggregate(core, akka, streams)
+   .aggregate(core, streams)
 

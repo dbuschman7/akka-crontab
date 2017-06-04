@@ -1,9 +1,15 @@
+.DS_Store
+
 *.class
 *.log
 
 .classpath
 .project
 .settings/
+.iml
+.idea/
+
+akka-crontab.iml
 
 # sbt specific
 .cache

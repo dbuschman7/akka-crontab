@@ -4,15 +4,11 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-import scala.concurrent.duration.{ Duration, DurationInt, FiniteDuration }
+import akka.actor.{Actor, ActorRef}
+import org.slf4j.{Logger, LoggerFactory}
 
-import akka.actor.Actor
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import akka.actor.ActorRef
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-import scala.concurrent.Await
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 // Model 
 sealed case class CronConfig(receiver: ActorRef, cron: Cron, threshold: Duration = 5 seconds)
@@ -29,7 +25,8 @@ class ScheduleActor(implicit config: CronConfig)
     with SchedulingLogic
     with LogHelper {
 
-  import context._
+  implicit val system = context.system
+  implicit val ec = system.dispatcher
 
   protected val log = LoggerFactory.getLogger(classOf[ScheduleActor].getSimpleName)
 
