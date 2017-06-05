@@ -1,10 +1,29 @@
 
 lazy val common = Seq(
-   organization := "me.lightspeed7",
-   crossScalaVersions := Seq("2.11.11", "2.12.2"), 
-   version := "0.3.0",
-   testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
-  )
+  crossScalaVersions := Seq("2.11.11", "2.12.2"),
+  //
+  organization := "me.lightspeed7",
+  version := "0.3.0",
+  //
+  testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
+  //
+  licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+  scmInfo := Some(ScmInfo(
+    url("https://github.com/dbuschman7/akka-crontab/tree/release-" + version.value),
+    "scm:git:https://github.com/dbuschman7/akka-crontab.git",
+    Some("scm:git:https://github.com/dbuschman7/akka-crontab.git"))),
+  pomIncludeRepository := { _ => false },
+  pomExtra :=
+    <url>http://github.com/dbuschman7/akka-crontab</url>
+      <developers>
+        <developer>
+          <id>dbuschman7</id>
+          <name>David Buschman</name>
+          <email>david.buschman7@gmail.com</email>
+        </developer>
+      </developers>
+)
+
 
 lazy val core = project
   .settings(common)
