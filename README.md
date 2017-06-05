@@ -3,6 +3,11 @@ Running crontabs with an Akka ActorSystem without a ton of dependencies
 
 See (Wikipedia)[https://en.wikipedia.org/wiki/Cron]
 
+## Summary 
+* Uses Java 8 Time API for data and time calculations
+* Slf4j for common logging support 
+* Minimalized dependencies - KISS 
+
 ## Constructing Cron object
 
 Cron object can be constructed from various helper methods and Raw construction
