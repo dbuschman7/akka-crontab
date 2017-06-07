@@ -3,7 +3,7 @@ lazy val common = Seq(
   crossScalaVersions := Seq("2.11.11", "2.12.2"),
   //
   organization := "me.lightspeed7",
-  version := "0.3.0",
+  version := "0.3.1",
   //
   testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
   //
@@ -14,7 +14,6 @@ lazy val common = Seq(
     Some("scm:git:https://github.com/dbuschman7/akka-crontab.git"))),
   pomIncludeRepository := { _ => false },
   pomExtra :=
-    <url>http://github.com/dbuschman7/akka-crontab</url>
       <developers>
         <developer>
           <id>dbuschman7</id>
