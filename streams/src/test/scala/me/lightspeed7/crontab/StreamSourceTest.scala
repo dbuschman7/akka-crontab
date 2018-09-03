@@ -2,9 +2,10 @@ package me.lightspeed7.crontab
 
 import java.time.LocalDateTime
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Sink, Source}
 import akka.testkit.TestKit
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
@@ -36,8 +37,9 @@ class StreamSourceTest
       println(s"Fired - $dt")
     }
 
-    val f = StreamSource.create(Crontab.everyMinute).runWith(sink)
-    Try(Await.ready(f, 120 seconds))
+    val src: Source[LocalDateTime, NotUsed] = StreamSource.create(Crontab.everyMinute)
+
+    Try(Await.ready( src.runWith(sink), 120 seconds))
 
     firedCount shouldBe 2
   }

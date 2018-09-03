@@ -60,4 +60,17 @@ class CronActor(cron: Cron) extends Actor {
 ```
 
 
+## Running a Cron as an Akka Stream Source 
 
+```scala
+import me.lightspeed7.crontab._
+
+val cron: Cron = ... 
+
+val sink = Sink.foreach[LocalDateTime] { dt => println(s"Fired - $dt") }
+
+val src: Source[LocalDateTime, NotUsed] = StreamSource.create(cron)
+    
+src.runWith(sink) // run your stream
+
+```
