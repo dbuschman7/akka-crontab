@@ -1,17 +1,17 @@
 package me.lightspeed7.crontab
 
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
+import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Actor, ActorRef, ActorSystem}
+import akka.actor.{Actor, ActorSystem}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 import scala.concurrent.duration._
 
 // Model 
-sealed case class CronConfig(receiver: ActorRef, cron: Cron, threshold: Duration = 5 seconds)
+sealed case class CronConfig(receiver: LocalDateTime => Unit, cron: Cron, threshold: Duration = 5 seconds)
 
 sealed case class NextRunTime(time: LocalDateTime)
 
@@ -35,7 +35,7 @@ class ScheduleActor(implicit config: CronConfig)
   private var nextTime: Option[LocalDateTime] = None
 
   override def preStart(): Unit = {
-    generateNextRun
+    generateNextRun(LocalDateTime.now)
     ()
   }
 
@@ -61,8 +61,8 @@ class ScheduleActor(implicit config: CronConfig)
   // Helpers
   private def fireCron(time: LocalDateTime) = {
     logInfo("fireCron - time - " + time)
-    config.receiver ! time // fire
-    generateNextRun
+    config.receiver(time) // fire
+    generateNextRun(time)
   }
 
   private def scheduleWait(waitFor: WaitFor) = {
@@ -71,7 +71,7 @@ class ScheduleActor(implicit config: CronConfig)
     system.scheduler.scheduleOnce(dur, self, CalcNextDistance) // another wait cycle
   }
 
-  private def generateNextRun = nextIteration(config.cron, config.threshold)
+  private def generateNextRun(last: LocalDateTime) = nextIteration(last.plusSeconds(1), config.cron)
     .map { next =>
       logInfo("nextIteration - Next scheduled time - " + next.toString)
       self ! NextRunTime(next.time)
@@ -89,9 +89,8 @@ trait TimeTracking {
 
 trait SchedulingLogic {
 
-  protected def nextIteration(cron: Cron, threshold: Duration)(implicit ec: ExecutionContext): Future[NextRunTime] = {
-    val nextStart = LocalDateTime.now.plusSeconds(threshold.toSeconds)
-    Schedule.nextScheduledTime(nextStart)(cron)
+  protected def nextIteration(last: LocalDateTime, cron: Cron)(implicit ec: ExecutionContext): Future[NextRunTime] = {
+    Schedule.nextScheduledTime(last)(cron)
       .map {
         time: LocalDateTime => NextRunTime(time)
       }

@@ -20,6 +20,8 @@ object Crontab extends RegexParsers {
 
   def everyDayAt(hour: Int) = Cron(Fixed(0), Fixed(hour), Every, Every, Every)
 
+  def everyMinute = Cron(Every, Every, Every, Every, Every)
+
   //
   // Parser 
   // //////////////////////////

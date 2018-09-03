@@ -12,7 +12,7 @@ import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration._
 
 class ScheduleActorTest
-    extends TestKit(ActorSystem("Scheduling"))
+  extends TestKit(ActorSystem("Scheduling"))
     with FunSuiteLike
     with Matchers
     with ImplicitSender
@@ -34,7 +34,7 @@ class ScheduleActorTest
 
   test("Testing NextIteration Business Logic") {
     val cron = Cron(Every, Every, Every, Every, Every)
-    val nextRun = Await.result(nextIteration(cron, 5 seconds), Duration.Inf)
+    val nextRun = Await.result(nextIteration(LocalDateTime.now, cron), Duration.Inf)
     val now = LocalDateTime.now
     val delta = now.until(nextRun.time, ChronoUnit.MILLIS)
     delta should be > 0L
@@ -61,7 +61,7 @@ class TestActor extends Actor {
 
   val events = new java.util.ArrayList[LocalDateTime]()
 
-  val scheduler: ActorRef = context.actorOf(Props(classOf[ScheduleActor], CronConfig(self, cron)))
+  val scheduler: ActorRef = context.actorOf(Props(classOf[ScheduleActor], CronConfig({ dt => self ! dt }, cron)))
 
   def receive: Actor.Receive = {
     case time: LocalDateTime =>
