@@ -1,4 +1,6 @@
 # akka-crontab
+[![Bintray](https://img.shields.io/bintray/v/lightspeed7/maven/akka-crontab.svg?maxAge=2592000)](https://bintray.com/lightspeed7/maven/akka-crontab)
+
 Running crontabs with an Akka ActorSystem without a ton of dependencies
 
 See (Wikipedia)[https://en.wikipedia.org/wiki/Cron]
