@@ -3,12 +3,12 @@ package me.lightspeed7.crontab
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import akka.util.Timeout
 import org.scalatest._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration._
 
 class ScheduleActorTest
@@ -19,18 +19,16 @@ class ScheduleActorTest
     with BeforeAndAfterAll
     with SchedulingLogic {
 
-  implicit val ec = system.dispatcher
-  implicit val timeout = Timeout.apply(5 seconds)
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
+  implicit val timeout: Timeout = Timeout.apply(5 seconds)
 
   System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE")
 
-  override def afterAll = TestKit.shutdownActorSystem(system)
+  override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
   // NOT A REAL TEST 
   ignore("Run Testing Actor") {
-    val ref = TestActorRef[TestActor]
-    val now = LocalDateTime.now()
-
+    val _ = TestActorRef[TestActor]
     Thread.sleep(60 * 1000 * 1000) // will NOT make this block fail
   }
 
@@ -39,7 +37,7 @@ class ScheduleActorTest
     val nextRun = Await.result(nextIteration(cron, 5 seconds), Duration.Inf)
     val now = LocalDateTime.now
     val delta = now.until(nextRun.time, ChronoUnit.MILLIS)
-    delta should be > (0L)
+    delta should be > 0L
     delta should be < (61L * 1000) // 1 second threshold
   }
 
@@ -63,11 +61,13 @@ class TestActor extends Actor {
 
   val events = new java.util.ArrayList[LocalDateTime]()
 
-  val scheduler = context.actorOf(Props(classOf[ScheduleActor], CronConfig(self, cron)))
+  val scheduler: ActorRef = context.actorOf(Props(classOf[ScheduleActor], CronConfig(self, cron)))
 
   def receive: Actor.Receive = {
     case time: LocalDateTime =>
-      println("recieving event"); events.add(time)
+      println("receiving event")
+      events.add(time)
+      ()
     case unknown => println("Unknown Message - " + unknown)
   }
 }

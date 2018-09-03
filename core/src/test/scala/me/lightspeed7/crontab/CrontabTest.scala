@@ -1,12 +1,12 @@
 package me.lightspeed7.crontab
 
-import java.time.{ LocalDateTime, ZoneId }
+import java.time.LocalDateTime
 
-import org.scalatest.FunSuite
-import org.scalatest.Matchers.{ be, convertToAnyShouldWrapper, convertToStringShouldWrapper }
+import org.scalatest.{Assertion, FunSuite}
+import org.scalatest.Matchers.{be, convertToAnyShouldWrapper}
 
 class CrontabTest extends FunSuite {
-  import Crontab._
+
   import Schedule._
 
   test("Predefined") {
@@ -84,17 +84,17 @@ class CrontabTest extends FunSuite {
   }
 
   test("Timing Every match") {
-    matches(Every, LocalDateTime.of(2017, 3, 14, 0, 2, 1, 0), (time) => time.getMinute) should be(true)
+    matches(Every, LocalDateTime.of(2017, 3, 14, 0, 2, 1, 0), time => time.getMinute) should be(true)
 
     // do the exhaustive
     def compare: Compare = {
-      case (matchDate, matchDay, matchDow, matchNth, testDate, testDay, testDow, testNth) ⇒
-        val result = matches(Every, testDate, (time) => time.getMinute)
+      case (_, _, _, _, testDate, _, _, _) ⇒
+        val result = matches(Every, testDate, time => time.getMinute)
         val expected = true
         result == expected
     }
 
-    (2010 to 2020).map(exhaustiveDays(_, compare))
+    (2010 to 2020).foreach(exhaustiveDays(_, compare))
   }
 
   test("Timing Steps match") {
@@ -104,13 +104,13 @@ class CrontabTest extends FunSuite {
 
     // do the exhaustive
     def compare: Compare = {
-      case (matchDate, matchDay, matchDow, matchNth, testDate, testDay, testDow, testNth) ⇒
+      case (_, matchDay, _, _, testDate, testDay, _, _) ⇒
         val result = matches(Steps(Seq(matchDay)), testDate, extDay)
         val expected = testDay == matchDay
         result == expected
     }
 
-    (2010 to 2020).map(exhaustiveDays(_, compare))
+    (2010 to 2020).foreach(exhaustiveDays(_, compare))
   }
 
   test("Timing Range Test") {
@@ -119,13 +119,13 @@ class CrontabTest extends FunSuite {
 
     // do the exhaustive
     def compare: Compare = {
-      case (matchDate, matchDay, matchDow, matchNth, testDate, testDay, testDow, testNth) ⇒
+      case (_, matchDay, _, _, testDate, testDay, _, _) ⇒
         val result = matches(Range(matchDay, matchDay), testDate, extDay)
         val expected = testDay == matchDay
         result == expected
     }
 
-    (2010 to 2020).map(exhaustiveDays(_, compare))
+    (2010 to 2020).foreach(exhaustiveDays(_, compare))
   }
 
   test("Timing Fixed Test") {
@@ -134,13 +134,13 @@ class CrontabTest extends FunSuite {
 
     // do the exhaustive
     def compare: Compare = {
-      case (matchDate, matchDay, matchDow, matchNth, testDate, testDay, testDow, testNth) ⇒
+      case (_, matchDay, _, _, testDate, testDay, _, _) ⇒
         val result = matches(Fixed(matchDay), testDate, extDay)
         val expected = testDay == matchDay
         result == expected
     }
 
-    (2010 to 2020).map(exhaustiveDays(_, compare))
+    (2010 to 2020).foreach(exhaustiveDays(_, compare))
   }
 
   test("Timing NthDow Test") {
@@ -169,12 +169,11 @@ class CrontabTest extends FunSuite {
   type Compare = (LocalDateTime, Int, Int, Int, LocalDateTime, Int, Int, Int) ⇒ Boolean // true == pass 
 
   // DOW-based logic testing 
-  def exhaustiveDow(year: Int, timing: Timing) = {
+  def exhaustiveDow(year: Int, timing: Timing): Assertion = {
     val results: Seq[(Int, Int, Int)] = for {
-      month <- (1 to 12)
-      day <- (1 to LocalDateTime.of(year, month, 1, 0, 0, 0, 0).toLocalDate().lengthOfMonth())
+      month <- 1 to 12
+      day <- 1 to LocalDateTime.of(year, month, 1, 0, 0, 0, 0).toLocalDate.lengthOfMonth()
       date = LocalDateTime.of(year, month, day, 0, 0, 0, 0)
-      dow = date.getDayOfWeek.getValue()
       if matches(timing, date, extDow)
     } yield {
       (year, month, day)
@@ -186,9 +185,10 @@ class CrontabTest extends FunSuite {
   }
 
   // Day-based logic testing 
-  def exhaustiveDays(year: Int, compare: Compare): Unit = (1 to 12).map { mth ⇒ exhaustiveDays(year, mth, compare) }
+  def exhaustiveDays(year: Int, compare: Compare): Unit = (1 to 12).foreach { mth ⇒ exhaustiveDays(year, mth, compare) }
+
   def exhaustiveDays(year: Int, month: Int, compare: Compare): Unit = {
-    val range = (1 to LocalDateTime.of(year, month, 1, 0, 0, 0, 0).toLocalDate().lengthOfMonth())
+    val range = 1 to LocalDateTime.of(year, month, 1, 0, 0, 0, 0).toLocalDate.lengthOfMonth()
     for {
       // matching
       matchDay ← range
@@ -201,9 +201,8 @@ class CrontabTest extends FunSuite {
       testDow = testDate.getDayOfWeek.getValue % 7
       testNth = ((testDay - 1) / 7) + 1
     } yield {
-      compare(matchDate, matchDay, matchDow, matchNth, testDate, testDay, testDow, testNth) match {
-        case true  ⇒ // pass 
-        case false ⇒ fail(f"Match(${matchDate}) - ${matchDay}%2d ${matchDow}%1d ${matchNth}%1d Test - ${testDay}%2d ${testDow}%1d ${testNth}%1d")
+      if (!compare(matchDate, matchDay, matchDow, matchNth, testDate, testDay, testDow, testNth)) {
+        fail(f"Match($matchDate) - $matchDay%2d $matchDow%1d $matchNth%1d Test - $testDay%2d $testDow%1d $testNth%1d")
       }
     }
   }

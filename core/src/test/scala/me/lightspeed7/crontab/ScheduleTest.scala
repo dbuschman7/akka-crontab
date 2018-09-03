@@ -3,17 +3,16 @@ package me.lightspeed7.crontab
 import java.time.LocalDateTime
 
 import org.scalatest.FunSuite
-import org.scalatest.Matchers.{ be, convertToAnyShouldWrapper }
-import scala.concurrent.Await
+import org.scalatest.Matchers.{be, convertToAnyShouldWrapper}
+
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import scala.concurrent.duration._
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
 
 class ScheduleTest extends FunSuite {
 
   def await(in: Future[LocalDateTime]): LocalDateTime = Await.result(in, 5 seconds)
 
-  val dt = LocalDateTime.of(2017, 3, 14, 0, 2, 1, 0);
+  val dt: LocalDateTime = LocalDateTime.of(2017, 3, 14, 0, 2, 1, 0)
 
   test("Single Point Schedule Tests") {
 
@@ -30,12 +29,12 @@ class ScheduleTest extends FunSuite {
   }
 
   test("Cron that will never run but times out") {
-    implicit val ex = ExecutionContext.global
+    implicit val ex: ExecutionContextExecutor = ExecutionContext.global
     val result = Await.ready(Schedule.nextScheduledTime(dt, 5 seconds)(cron"0 0 5 31 2".get), 20 seconds)
     result.isCompleted should be(true)
     result.value.get.isFailure should be(true)
     result.recover {
-      case (e: Throwable) =>
+      case e: Throwable =>
         e.getClass.getSimpleName should be("TimeoutException")
     }
   }

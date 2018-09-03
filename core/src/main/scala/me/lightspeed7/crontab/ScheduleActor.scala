@@ -4,48 +4,58 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, ActorSystem}
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 import scala.concurrent.duration._
 
 // Model 
 sealed case class CronConfig(receiver: ActorRef, cron: Cron, threshold: Duration = 5 seconds)
 
 sealed case class NextRunTime(time: LocalDateTime)
+
 sealed case class WaitFor(delta: Long) {
   def toDuration: FiniteDuration = FiniteDuration(delta, TimeUnit.MILLISECONDS)
 }
+
 case object CalcNextDistance {}
 
 // Actor
 class ScheduleActor(implicit config: CronConfig)
-    extends Actor
+  extends Actor
     with SchedulingLogic
     with LogHelper {
 
-  implicit val system = context.system
-  implicit val ec = system.dispatcher
+  implicit val system: ActorSystem = context.system
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
 
-  protected val log = LoggerFactory.getLogger(classOf[ScheduleActor].getSimpleName)
+  protected val log: Logger = LoggerFactory.getLogger(classOf[ScheduleActor].getSimpleName)
 
   private var nextTime: Option[LocalDateTime] = None
 
-  override def preStart(): Unit = generateNextRun
+  override def preStart(): Unit = {
+    generateNextRun
+    ()
+  }
 
   def receive: Actor.Receive = {
-    case next: NextRunTime => {
+    case next: NextRunTime =>
       nextTime = Option(next.time)
       self ! CalcNextDistance
-    }
     case CalcNextDistance => nextTime
-      .map { next => self ! calcTimeDistance(next) }
-      .orElse { logWarn("CalcNextDistance - No time to use for for calculation"); None }
-    case waitFor: WaitFor => waitFor.delta match {
-      case n if n < config.threshold.toMillis ⇒ nextTime.map(fireCron)
-      case n                                  ⇒ scheduleWait(waitFor)
-    }
+      .map { next => self ! calcTimeDistance(next); true }
+      .orElse {
+        logWarn("CalcNextDistance - No time to use for for calculation")
+        None
+      }
+      ()
+    case waitFor: WaitFor =>
+      waitFor.delta match {
+        case n if n < config.threshold.toMillis ⇒ nextTime.map(fireCron)
+        case _ ⇒ scheduleWait(waitFor)
+      }
+      ()
   }
 
   // Helpers
@@ -63,16 +73,17 @@ class ScheduleActor(implicit config: CronConfig)
 
   private def generateNextRun = nextIteration(config.cron, config.threshold)
     .map { next =>
-      logInfo("nextIteration - Next scheduled time - " + next.toString())
+      logInfo("nextIteration - Next scheduled time - " + next.toString)
       self ! NextRunTime(next.time)
     }.recover {
-      case ex =>
-        logError("nextIteration - Stopping", ex)
-        context.stop(self)
-    }
+    case ex =>
+      logError("nextIteration - Stopping", ex)
+      context.stop(self)
+  }
 }
 
-trait TimeTracking { self: Actor =>
+trait TimeTracking {
+  self: Actor =>
 
 }
 
@@ -82,7 +93,7 @@ trait SchedulingLogic {
     val nextStart = LocalDateTime.now.plusSeconds(threshold.toSeconds)
     Schedule.nextScheduledTime(nextStart)(cron)
       .map {
-        case time: LocalDateTime => NextRunTime(time)
+        time: LocalDateTime => NextRunTime(time)
       }
   }
 
@@ -97,25 +108,25 @@ trait LogHelper {
 
   protected def log: Logger
 
-  protected final def logDebug(msg: String, t: Throwable = null)(implicit config: CronConfig) = {
+  protected final def logDebug(msg: String, t: Throwable = null)(implicit config: CronConfig): Unit = {
     if (log.isDebugEnabled()) {
       log.debug(config.cron.toString + " - " + msg, t)
     }
   }
 
-  protected final def logInfo(msg: String, t: Throwable = null)(implicit config: CronConfig) = {
+  protected final def logInfo(msg: String, t: Throwable = null)(implicit config: CronConfig): Unit = {
     if (log.isInfoEnabled()) {
       log.info(config.cron.toString + " - " + msg, t)
     }
   }
 
-  protected final def logWarn(msg: String, t: Throwable = null)(implicit config: CronConfig) = {
+  protected final def logWarn(msg: String, t: Throwable = null)(implicit config: CronConfig): Unit = {
     if (log.isWarnEnabled()) {
       log.warn(config.cron.toString + " - " + msg, t)
     }
   }
 
-  protected final def logError(msg: String, t: Throwable = null)(implicit config: CronConfig) = {
+  protected final def logError(msg: String, t: Throwable = null)(implicit config: CronConfig): Unit = {
     if (log.isErrorEnabled()) {
       log.error(config.cron.toString + " - " + msg, t)
     }
