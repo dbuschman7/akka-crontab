@@ -9,6 +9,21 @@ See (Wikipedia)[https://en.wikipedia.org/wiki/Cron]
 * Uses Java 8 Time API for data and time calculations
 * Slf4j for common logging support 
 * Minimalized dependencies - KISS 
+* Available for Scala 2.11 and 2.12 
+
+## Build setup 
+```
+resolvers in ThisBuild += Resolver.jcenterRepo
+```
+plus 
+
+```
+libraryDependencies ++= “me.lightspeed7” %% “akka-crontab” % “0.3.2”
+```
+or
+```
+libraryDependencies ++= “me.lightspeed7” %% “akka-crontab-streams” % “0.3.2”
+```
 
 ## Constructing Cron object
 
