@@ -10,10 +10,12 @@ import akka.stream.scaladsl.{Source, SourceQueueWithComplete}
 object StreamSource {
 
   def create(cron: Cron)(implicit system: ActorSystem): Source[LocalDateTime, NotUsed] = {
-    Source
-      .queue[LocalDateTime](1, OverflowStrategy.dropHead)
+    Source.queue[LocalDateTime](1, OverflowStrategy.dropHead)
       .mapMaterializedValue { queue: SourceQueueWithComplete[LocalDateTime] =>
-        system.actorOf(Props(classOf[ScheduleActor], CronConfig({ dt => queue.offer(dt) }, cron)))
+        system.actorOf(Props(classOf[ScheduleActor], CronConfig({ dt =>
+          queue.offer(dt)
+          ()
+        }, cron)))
         NotUsed
       }
   }

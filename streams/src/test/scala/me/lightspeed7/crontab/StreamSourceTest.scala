@@ -22,8 +22,11 @@ class StreamSourceTest
   implicit val mat: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContext = system.dispatcher
 
-  override def beforeAll: Unit = system.scheduler.schedule(0 seconds, 10 seconds) {
-    println(s"Dt = ${LocalDateTime.now}")
+  override def beforeAll: Unit = {
+    system.scheduler.schedule(0 seconds, 10 seconds) {
+      println(s"Dt = ${LocalDateTime.now}")
+    }
+    ()
   }
 
 
