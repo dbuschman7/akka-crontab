@@ -1,13 +1,13 @@
-version in ThisBuild:= "0.3.2"
+version in ThisBuild:= "0.3.3"
 
-val AkkaVersion = "2.5.16"
+val AkkaVersion = "2.5.25"
 
 val Core = Seq(
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.1", /*    */ // BSD 3-clause
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2", /*    */ // BSD 3-clause
   "com.typesafe.akka" %% "akka-actor" /*              */ % AkkaVersion, /* */ // ApacheV2
   "org.slf4j" /*         */ % "slf4j-api" /*          */ % "1.7.25", /*   */ // MIT
   //
-  "org.scalatest" /*    */ %% "scalatest" /*          */ % "3.0.3" % Test, // ApacheV2
+  "org.scalatest" /*    */ %% "scalatest" /*          */ % "3.0.8" % Test, // ApacheV2
   "com.typesafe.akka" %% "akka-testkit" /*            */ % AkkaVersion % Test, // ApacheV2
   "org.slf4j" /*         */ % "slf4j-simple" /*       */ % "1.7.25" % Test // MIT
 )
@@ -20,7 +20,7 @@ val Streams = Core ++ Seq(
 
 
 lazy val common = Seq(
-  crossScalaVersions := Seq("2.11.11", "2.12.2"),
+  crossScalaVersions := Seq("2.11.12", "2.12.9", "2.13.0"),
   //
   organization := "me.lightspeed7",
   //
@@ -40,7 +40,6 @@ lazy val common = Seq(
     "-unchecked",
     //  "-Xfatal-warnings",
     "-Xlint",
-    "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",

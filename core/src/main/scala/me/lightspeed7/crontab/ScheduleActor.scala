@@ -1,7 +1,7 @@
 package me.lightspeed7.crontab
 
 import java.time.LocalDateTime
-import java.time.temporal.{ChronoUnit, TemporalUnit}
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, ActorSystem}
