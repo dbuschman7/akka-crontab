@@ -104,7 +104,7 @@ class CrontabTest extends FunSuite {
 
     // do the exhaustive
     def compare: Compare = {
-      case (_, matchDay, _, _, testDate, testDay, _, _) ⇒
+      case (_, matchDay, _, _, testDate, testDay, _, _) =>
         val result = matches(Steps(Seq(matchDay)), testDate, extDay)
         val expected = testDay == matchDay
         result == expected
@@ -119,7 +119,7 @@ class CrontabTest extends FunSuite {
 
     // do the exhaustive
     def compare: Compare = {
-      case (_, matchDay, _, _, testDate, testDay, _, _) ⇒
+      case (_, matchDay, _, _, testDate, testDay, _, _) =>
         val result = matches(Range(matchDay, matchDay), testDate, extDay)
         val expected = testDay == matchDay
         result == expected
@@ -134,7 +134,7 @@ class CrontabTest extends FunSuite {
 
     // do the exhaustive
     def compare: Compare = {
-      case (_, matchDay, _, _, testDate, testDay, _, _) ⇒
+      case (_, matchDay, _, _, testDate, testDay, _, _) =>
         val result = matches(Fixed(matchDay), testDate, extDay)
         val expected = testDay == matchDay
         result == expected
@@ -191,12 +191,12 @@ class CrontabTest extends FunSuite {
     val range = 1 to LocalDateTime.of(year, month, 1, 0, 0, 0, 0).toLocalDate.lengthOfMonth()
     for {
       // matching
-      matchDay ← range
+      matchDay <- range
       matchDate = LocalDateTime.of(year, month, matchDay, 0, 0, 0, 0)
       matchDow = matchDate.getDayOfWeek.getValue % 7
       matchNth = ((matchDay - 1) / 7) + 1
       // testing
-      testDay ← range
+      testDay <-  range
       testDate = LocalDateTime.of(year, month, testDay, 0, 0, 0, 0)
       testDow = testDate.getDayOfWeek.getValue % 7
       testNth = ((testDay - 1) / 7) + 1
@@ -205,6 +205,7 @@ class CrontabTest extends FunSuite {
         fail(f"Match($matchDate) - $matchDay%2d $matchDow%1d $matchNth%1d Test - $testDay%2d $testDow%1d $testNth%1d")
       }
     }
+    ()
   }
 
 }
