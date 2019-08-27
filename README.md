@@ -9,7 +9,7 @@ See (Wikipedia)[https://en.wikipedia.org/wiki/Cron]
 * Uses Java 8 Time API for data and time calculations
 * Slf4j for common logging support 
 * Minimalized dependencies - KISS 
-* Available for Scala 2.11, 2.12 ans 2.13 
+* Available for Scala 2.11, 2.12 and 2.13 
 
 ## Build setup 
 ```
